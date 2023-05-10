@@ -13,6 +13,7 @@
     <string name="button_save">Save</string>
     <string name="button_record">Record</string>
     <string name="button_cancel">Cancel</string>
+    <string name="button_delete">Delete</string>
     <string name="button_goback">Go Back</string>
     <string name="editText_user_id">User Id.</string>
     <string name="editText_user_name">Name</string>

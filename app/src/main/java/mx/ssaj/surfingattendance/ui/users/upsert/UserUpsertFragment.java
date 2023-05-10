@@ -44,10 +44,14 @@ public class UserUpsertFragment extends Fragment {
         this.userId = userId;
 
         if (isNew) {// New user getting added
+            // Hide Delete button and SurfingTime sync message
+            binding.buttonDelete.setVisibility(View.INVISIBLE);
+            binding.textViewUserUpsertSurfingtimesync.setVisibility(View.INVISIBLE);
+
             SurfingAttendanceDatabase.databaseWriteExecutor.execute(() -> {
                 int nextUserId = userUpsertViewModel.nextId();
                 binding.editTextUpsertUserId.setText(String.valueOf(nextUserId));
-                binding.textViewUserUpsertSurfingtimesync.setVisibility(View.INVISIBLE);
+
             });
         } else {// Edit existing
             SurfingAttendanceDatabase.databaseWriteExecutor.execute(() -> {
@@ -141,6 +145,19 @@ public class UserUpsertFragment extends Fragment {
                 Navigation.findNavController(view).navigate(action);
             }
         });
+
+        // ON CLICK SET DELETE
+        // -----------------------------------------------------------------------------------------
+        if (!isNew) {
+            binding.buttonDelete.setOnClickListener(view -> {
+                SurfingAttendanceDatabase.databaseWriteExecutor.execute(() -> {
+                    userUpsertViewModel.delete(userId);
+                });
+
+                // Return one screen back (To Users screen)
+                Navigation.findNavController(view).popBackStack();
+            });
+        }
 
         return root;
     }
