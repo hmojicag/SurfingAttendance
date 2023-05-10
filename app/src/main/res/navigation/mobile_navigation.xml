@@ -7,7 +7,7 @@
 
     <fragment
         android:id="@+id/nav_home"
-        android:name="mx.ssaj.surfingattendanceapp.ui.home.HomeFragment"
+        android:name="mx.ssaj.surfingattendance.ui.home.HomeFragment"
         android:label="@string/menu_home"
         tools:layout="@layout/fragment_home" >
         <action
@@ -18,7 +18,7 @@
 
     <fragment
         android:id="@+id/nav_users"
-        android:name="mx.ssaj.surfingattendanceapp.ui.users.UsersFragment"
+        android:name="mx.ssaj.surfingattendance.ui.users.UsersFragment"
         android:label="@string/menu_users"
         tools:layout="@layout/fragment_users" >
         <action
@@ -29,20 +29,20 @@
 
     <fragment
         android:id="@+id/nav_attrecords"
-        android:name="mx.ssaj.surfingattendanceapp.ui.attrecords.AttRecordsFragment"
+        android:name="mx.ssaj.surfingattendance.ui.attrecords.AttRecordsFragment"
         android:label="@string/menu_attrecords"
         tools:layout="@layout/fragment_attrecords">
     </fragment>
 
     <fragment
         android:id="@+id/nav_settings"
-        android:name="mx.ssaj.surfingattendanceapp.ui.settings.SettingsFragment"
+        android:name="mx.ssaj.surfingattendance.ui.settings.SettingsFragment"
         android:label="@string/menu_settings">
     </fragment>
 
     <fragment
         android:id="@+id/nav_users_upsert"
-        android:name="mx.ssaj.surfingattendanceapp.ui.users.upsert.UserUpsertFragment"
+        android:name="mx.ssaj.surfingattendance.ui.users.upsert.UserUpsertFragment"
         android:label="@string/menu_users_upsert"
         tools:layout="@layout/fragment_users_upsert">
         <action
@@ -61,7 +61,7 @@
 
     <activity
         android:id="@+id/updateBioPhotoFaceDetectionActivity"
-        android:name="mx.ssaj.surfingattendanceapp.ui.facedetectionwrappers.UpdateBioPhotoFaceDetectionActivity"
+        android:name="mx.ssaj.surfingattendance.ui.facedetectionwrappers.UpdateBioPhotoFaceDetectionActivity"
         android:label="@string/activity_update_biophoto">
         <argument
             android:name="UserId"
@@ -71,7 +71,7 @@
 
     <fragment
         android:id="@+id/nav_attendance_password"
-        android:name="mx.ssaj.surfingattendanceapp.ui.passwordattendance.AttendanceByPasswordFragment"
+        android:name="mx.ssaj.surfingattendance.ui.passwordattendance.AttendanceByPasswordFragment"
         android:label="@string/menu_attendance_password"
         tools:layout="@layout/fragment_attendance_by_password">
         <action
