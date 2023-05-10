@@ -10,6 +10,9 @@ See and export as CSV the Attendance Records (punches).
 
 Users then will be able to "punch" by using their Face or by typing their Password.
 
+<img alt="en" height="300" src="./img/Home.png" width="100"/>
+
+
 ## License
 
 SurfingAttendance is an Open Source Android Application distributed under Apache License, Version 2.0.
