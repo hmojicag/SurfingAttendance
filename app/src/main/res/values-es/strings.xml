@@ -13,6 +13,7 @@
     <string name="button_save">Guardar</string>
     <string name="button_record">Registrar</string>
     <string name="button_cancel">Cancelar</string>
+    <string name="button_delete">Eliminar</string>
     <string name="button_goback">Regresar</string>
     <string name="editText_user_id">Id de Usuario.</string>
     <string name="editText_user_name">Nombre</string>

@@ -114,6 +114,14 @@
         android:text="@string/button_cancel"
         android:layout_margin="16dp" />
 
+    <Button
+        android:id="@+id/button_delete"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/danger"
+        android:text="@string/button_delete"
+        android:layout_margin="16dp" />
+
     <TextView
         android:id="@+id/textView_user_upsert_surfingtimesync"
         android:layout_width="wrap_content"
