@@ -10,8 +10,27 @@ See and export as CSV the Attendance Records (punches).
 
 Users then will be able to "punch" by using their Face or by typing their Password.
 
-<img alt="en" height="300" src="./img/Home.png" width="100"/>
+## Galery
 
+<p align="center">
+  <img alt="Home" src="./img/Home.png" width="20%"/>&nbsp; &nbsp; &nbsp; &nbsp;
+  <img alt="Menu" src="./img/Drawer_Nav_Menu.png" width="20%"/>&nbsp; &nbsp; &nbsp; &nbsp;
+  <img alt="Users" src="./img/Users.png" width="20%"/>&nbsp; &nbsp; &nbsp; &nbsp;
+  <img alt="Upsert User" src="./img/Upsert_User.png" width="20%"/>
+</p>
+
+<p align="center">
+  <img alt="Attendance Records" src="./img/AttendanceRecords_Punches.png" width="20%"/>&nbsp; &nbsp; &nbsp; &nbsp;
+  <img alt="Punch By Face 1" src="./img/Punch_By_Face_1.png" width="20%"/>&nbsp; &nbsp; &nbsp; &nbsp;
+  <img alt="Punch By Face 2" src="./img/Punch_By_Face_2.png" width="20%"/>&nbsp; &nbsp; &nbsp; &nbsp;
+  <img alt="Settings" src="./img/Settings.png" width="20%"/>
+</p>
+
+<p align="center">
+  <img alt="Punch By Password 1" src="./img/Punch_By_Password_1.png" width="20%"/>&nbsp; &nbsp; &nbsp; &nbsp;
+  <img alt="Punch By Password 2" src="./img/Punch_By_Password_2.png" width="20%"/>&nbsp; &nbsp; &nbsp; &nbsp;
+  <img alt="Punch By Password 3" src="./img/Punch_By_Password_3.png" width="20%"/>
+</p>
 
 ## License
 
@@ -46,20 +65,6 @@ This is extremely useful if you plan to manage more than 1 SurfingAttendance dev
 SurfingTime also supports the Push protocol used by ZKTeco devices making a SurfingAttendance device merge seamlessly into a group ZKTeco devices.
 
 We aim to open this feature to the public but at the time of writing this it's still under development.
-
-## Snapshots
-
-How to create a new user
-
-
-Add a BioPhoto to the user
-
-
-Punch using Face
-
-
-Punch using Password
-
 
 ## Source disclaimer
 
