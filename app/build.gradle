@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace 'mx.ssaj.surfingattendanceapp'
+    namespace 'mx.ssaj.surfingattendance'
     compileSdk 33
 
     defaultConfig {
-        applicationId "mx.ssaj.surfingattendanceapp"
+        applicationId "mx.ssaj.surfingattendance"
         minSdk 28
         targetSdk 33
         versionCode 1
@@ -89,7 +89,7 @@ dependencies {
     androidTestImplementation 'androidx.test.ext:junit:1.1.4'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.0'
 
-    // Detection dependencies for detection package from mx.ssaj.surfingattendanceapp.detection
+    // Detection dependencies for detection package from mx.ssaj.surfingattendance.detection
     // added MLKit dependencies for face detector
     implementation 'com.google.mlkit:face-detection:16.0.0'
     implementation 'org.tensorflow:tensorflow-lite:2.6.0'
