@@ -7,6 +7,7 @@
     <string name="nav_header_desc">SurfingAttendance App</string>
     <string name="action_settings">Settings</string>
     <string name="action_face_recognition_test">Face Recognition Test</string>
+    <string name="action_surfingtime_sync">Surfing Sync</string>
 
     <string name="button_open_attendance_face_activity">Attendance by Face</string>
     <string name="button_add_user">Add User</string>

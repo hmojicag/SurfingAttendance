@@ -69,6 +69,7 @@ public class UpdateBioPhotoViewModel extends AndroidViewModel {
             // Scale down the size of the image
             Bitmap profilePicture = Util.getResizedBitmap(fullPhoto, 120, 120);
             user.setBioPhotoContent(profilePicture);
+            user.isSync = Literals.FALSE;
             usersRepository.update(user);
         }
 
