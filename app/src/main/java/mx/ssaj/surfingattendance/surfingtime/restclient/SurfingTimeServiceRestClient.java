@@ -24,27 +24,27 @@ public interface SurfingTimeServiceRestClient {
     @POST("api/auth")
     Call<TokenResponse> requestToken(@Body TokenRequest tokenRequest);
 
-    @POST("api/attdevice/info")
+    @POST("api/attendance/device/info")
     Call<ApiInfoResponse> info(@Header("Authorization") String authorization, @Body ApiInfoRequest apiInfoRequest);
 
-    @GET("api/attdevice/commands")
+    @GET("api/attendance/device/commands")
     Call<List<ApiCommand>> getCommands(@Header("Authorization") String authorization);
 
-    @PUT("api/attdevice/commands")
+    @PUT("api/attendance/device/commands")
     Call<Void> updateCommands(@Header("Authorization") String authorization, @Body List<ApiCommandUpdate> updates);
 
-    @PUT("api/attlogs")
+    @PUT("api/attendance/attlogs")
     Call<Void> upsertAttLogs(@Header("Authorization") String authorization, @Body List<ApiAttLog> apiAttLogs);
 
-    @GET("api/user/{id}")
+    @GET("api/attendance/user/{id}")
     Call<ApiUser> getUserById(@Header("Authorization") String authorization, @Path("id") int id);
 
-    @PUT("api/user/{id}")
+    @PUT("api/attendance/user/{id}")
     Call<Void> upsertUser(@Header("Authorization") String authorization, @Path("id") int id, @Body ApiUser user);
 
-    @GET("api/user/{id}/biophoto")
+    @GET("api/attendance/user/{id}/biophoto")
     Call<ApiBioPhoto> getBioPhotoForUser(@Header("Authorization") String authorization, @Path("id") int id);
 
-    @PUT("api/user/{id}/biophoto")
+    @PUT("api/attendance/user/{id}/biophoto")
     Call<Void> upsertBioPhotoForUser(@Header("Authorization") String authorization, @Path("id") int id, @Body ApiBioPhoto apiBioPhoto);
 }
