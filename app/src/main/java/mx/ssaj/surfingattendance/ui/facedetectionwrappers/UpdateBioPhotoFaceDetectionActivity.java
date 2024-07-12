@@ -2,13 +2,10 @@ package mx.ssaj.surfingattendance.ui.facedetectionwrappers;
 
 import android.graphics.Bitmap;
 import android.os.Bundle;
-
 import androidx.lifecycle.ViewModelProvider;
-
-import java.util.UUID;
-
 import mx.ssaj.surfingattendance.data.SurfingAttendanceDatabase;
-import mx.ssaj.surfingattendance.detection.dto.FaceRecord;
+import mx.ssaj.surfingattendance.data.model.BioPhotos;
+import mx.ssaj.surfingattendance.facerecognition.dto.RecognitionResult;
 import mx.ssaj.surfingattendance.ui.facedetectionwrappers.viewmodels.UpdateBioPhotoViewModel;
 
 public class UpdateBioPhotoFaceDetectionActivity extends SurfingDetectorActivity {
@@ -27,29 +24,19 @@ public class UpdateBioPhotoFaceDetectionActivity extends SurfingDetectorActivity
         activateFaceFeaturesDetection(true);
 
         // Capture safe args
-        userId = UpdateBioPhotoFaceDetectionActivityArgs.fromBundle(getIntent().getExtras()).getUserId();
+        userId = mx.ssaj.surfingattendance.ui.facedetectionwrappers.UpdateBioPhotoFaceDetectionActivityArgs.fromBundle(getIntent().getExtras()).getUserId();
 
         // Add this User Id to the skip list so that it doesn't interfere with update
         userIdsToSkip.add(userId);
     }
 
     @Override
-    protected void onFaceFeaturesDetected(Bitmap fullPhoto, FaceRecord face) {
-        face.setName(UUID.randomUUID().toString());
-        registerNewFace(face);
-
-        // TODO: Upsert BioPhoto in database
+    protected void onFaceFeaturesDetected(Bitmap fullPhoto, RecognitionResult recognitionResult) {
         if (userId > -1) {// Upsert BioPhoto in database
             UpdateBioPhotoViewModel updateBioPhotoViewModel = new ViewModelProvider(this).get(UpdateBioPhotoViewModel.class);
-            // Store face.getRecognition().getExtra() which is a float[][], store as a json, this is used for the recognition engine
-            // Store face.getRecognition().getCrop() which is a BitMap of the cropped face that we can use as thumbnail for the BioPhoto
-            // Store fullPhoto, check if can be converted to jpg for compatibility with Horus
-            // TODO: DON'T STORE EXTRAS FOR NOW, JUST STORE THE FULL PHOTO AND RE-BUILD THE EXTRAS FROM IT AT APP STARTUP TO TEST WHAT'S BELOW!!!
-            // TODO: check if we can take the fullPhoto in jpg and feed it to the faceRecognition engine to extract the extras
-            // TODO: This way we won't need to send the extras to SurfingTime, just the fullphoto
-            // TODO: And everytime a the SurfingAttendance app receives a fullPhoto from SurfingTime it will compute the extras in realTime
             SurfingAttendanceDatabase.databaseWriteExecutor.execute(() -> {
-                updateBioPhotoViewModel.upsertBioPhotos(userId, fullPhoto, face);
+                BioPhotos bioPhoto = updateBioPhotoViewModel.upsertBioPhotos(userId, fullPhoto, recognitionResult);
+                registerNewFace(bioPhoto);
             });
         }
 

@@ -4,7 +4,6 @@ import android.app.Application;
 import android.graphics.Bitmap;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
-import org.apache.commons.lang3.ArrayUtils;
 import java.util.ArrayList;
 import java.util.List;
 import mx.ssaj.surfingattendance.data.model.BioPhotoFeatures;
@@ -13,8 +12,8 @@ import mx.ssaj.surfingattendance.data.model.Users;
 import mx.ssaj.surfingattendance.data.repositories.BioPhotoFeaturesRepository;
 import mx.ssaj.surfingattendance.data.repositories.BioPhotosRepository;
 import mx.ssaj.surfingattendance.data.repositories.UsersRepository;
-import mx.ssaj.surfingattendance.detection.dto.FaceRecord;
 import mx.ssaj.surfingattendance.detection.env.Logger;
+import mx.ssaj.surfingattendance.facerecognition.dto.RecognitionResult;
 import mx.ssaj.surfingattendance.util.BioDataType;
 import mx.ssaj.surfingattendance.util.Literals;
 import mx.ssaj.surfingattendance.util.Util;
@@ -33,7 +32,7 @@ public class UpdateBioPhotoViewModel extends AndroidViewModel {
         usersRepository = new UsersRepository(application);
     }
 
-    public void upsertBioPhotos(int userId, Bitmap fullPhoto, FaceRecord face) {
+    public BioPhotos upsertBioPhotos(int userId, Bitmap fullPhoto, RecognitionResult recognitionResult) {
         List<BioPhotos> bioPhotos = new ArrayList<>();
 
         // Full Photo to be stored in DB for SurfingAttendance and Horus
@@ -49,7 +48,7 @@ public class UpdateBioPhotoViewModel extends AndroidViewModel {
         BioPhotos thumbNailBiophoto = new BioPhotos();
         thumbNailBiophoto.user = userId;
         thumbNailBiophoto.type = BioDataType.BIOPHOTO_THUMBNAIL_JPG.getType();
-        thumbNailBiophoto.setBioPhotoContent(face.getRecognition().getCrop());
+        thumbNailBiophoto.setBioPhotoContent(recognitionResult.getCrop());
         thumbNailBiophoto.lastUpdated = Util.getDateTimeNow();
         thumbNailBiophoto.isSync = Literals.FALSE;
         bioPhotos.add(thumbNailBiophoto);
@@ -60,7 +59,7 @@ public class UpdateBioPhotoViewModel extends AndroidViewModel {
         BioPhotoFeatures bioPhotoFeatures = new BioPhotoFeatures();
         bioPhotoFeatures.user = userId;
         bioPhotoFeatures.type = biophoto.type;
-        bioPhotoFeatures.setFeatures((float[][]) face.getRecognition().getExtra());
+        bioPhotoFeatures.setFeatures(recognitionResult.getFeatures());
         bioPhotoFeaturesRepository.upsert(bioPhotoFeatures);
 
         // Store a resized version of the full photo as new profile picture
@@ -73,8 +72,11 @@ public class UpdateBioPhotoViewModel extends AndroidViewModel {
             usersRepository.update(user);
         }
 
-        // Log extras for debugging purposes
-        LOGGER.i(TAG, "Logging extras while storing user" + userId + " to DB: " + ArrayUtils.toString(face.getRecognition().getExtra()));
+        // Return the full saved BioPhoto
+        biophoto.User = user;
+        biophoto.Features = bioPhotoFeatures;
+        biophoto.Thumbnail = thumbNailBiophoto;
+        return biophoto;
     }
 
 }

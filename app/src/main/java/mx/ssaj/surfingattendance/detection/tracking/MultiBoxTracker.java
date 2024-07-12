@@ -34,8 +34,9 @@ import org.apache.commons.lang3.StringUtils;
 import mx.ssaj.surfingattendance.detection.env.BorderedText;
 import mx.ssaj.surfingattendance.detection.env.ImageUtils;
 import mx.ssaj.surfingattendance.detection.env.Logger;
-import mx.ssaj.surfingattendance.detection.tflite.SimilarityClassifier.Recognition;
+import mx.ssaj.surfingattendance.facerecognition.dto.RecognitionResult;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
@@ -116,7 +117,7 @@ public class MultiBoxTracker {
     }
   }
 
-  public synchronized void trackResults(final List<Recognition> results, final long timestamp) {
+  public synchronized void trackResults(final List<RecognitionResult> results, final long timestamp) {
     logger.d("Processing %d results from %d", results.size(), timestamp);
     processResults(results);
   }
@@ -172,13 +173,13 @@ public class MultiBoxTracker {
     }
   }
 
-  private void processResults(final List<Recognition> results) {
-    final List<Pair<Float, Recognition>> rectsToTrack = new LinkedList<Pair<Float, Recognition>>();
+  private void processResults(final List<RecognitionResult> results) {
+    final List<Pair<Float, RecognitionResult>> rectsToTrack = new ArrayList<>();
 
     screenRects.clear();
     final Matrix rgbFrameToScreen = new Matrix(getFrameToCanvasMatrix());
 
-    for (final Recognition result : results) {
+    for (final RecognitionResult result : results) {
       if (result.getLocation() == null) {
         continue;
       }
@@ -190,14 +191,14 @@ public class MultiBoxTracker {
       logger.v(
           "Result! Frame: " + result.getLocation() + " mapped to screen:" + detectionScreenRect);
 
-      screenRects.add(new Pair<Float, RectF>(result.getDistance(), detectionScreenRect));
+      screenRects.add(new Pair<Float, RectF>(result.getConfidence(), detectionScreenRect));
 
       if (detectionFrameRect.width() < MIN_SIZE || detectionFrameRect.height() < MIN_SIZE) {
         logger.w("Degenerate rectangle! " + detectionFrameRect);
         continue;
       }
 
-      rectsToTrack.add(new Pair<Float, Recognition>(result.getDistance(), result));
+      rectsToTrack.add(new Pair<Float, RecognitionResult>(result.getConfidence(), result));
     }
 
     trackedObjects.clear();
@@ -206,7 +207,7 @@ public class MultiBoxTracker {
       return;
     }
 
-    for (final Pair<Float, Recognition> potential : rectsToTrack) {
+    for (final Pair<Float, RecognitionResult> potential : rectsToTrack) {
       final TrackedRecognition trackedRecognition = new TrackedRecognition();
       trackedRecognition.detectionConfidence = potential.first;
       trackedRecognition.location = new RectF(potential.second.getLocation());

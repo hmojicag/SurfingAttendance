@@ -23,6 +23,8 @@ import mx.ssaj.surfingattendance.surfingtime.tasks.SyncCommandsUpdatesTask;
 import mx.ssaj.surfingattendance.surfingtime.tasks.SyncNewCommandsTask;
 import mx.ssaj.surfingattendance.surfingtime.tasks.SyncUsersTask;
 
+import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC;
+
 public class SurfingTimeForegroundService extends Service {
     private Timer timer;
     private SurfingTimeService surfingTimeService;
@@ -87,7 +89,7 @@ public class SurfingTimeForegroundService extends Service {
                 .setContentTitle("SurfingTime Sync")
                 .setSmallIcon(R.mipmap.ic_surfingattendance_foreground);
 
-        startForeground(1001, notification.build());
+        startForeground(1001, notification.build(), FOREGROUND_SERVICE_TYPE_DATA_SYNC);
         return super.onStartCommand(intent, flags, startId);
     }
 
