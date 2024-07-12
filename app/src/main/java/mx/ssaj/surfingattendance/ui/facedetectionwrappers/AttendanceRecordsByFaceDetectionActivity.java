@@ -17,8 +17,8 @@ import java.util.stream.Collectors;
 import mx.ssaj.surfingattendance.R;
 import mx.ssaj.surfingattendance.data.SurfingAttendanceDatabase;
 import mx.ssaj.surfingattendance.data.model.AttendanceRecord;
+import mx.ssaj.surfingattendance.data.model.BioPhotos;
 import mx.ssaj.surfingattendance.data.model.Users;
-import mx.ssaj.surfingattendance.detection.dto.FaceRecord;
 import mx.ssaj.surfingattendance.detection.env.Logger;
 import mx.ssaj.surfingattendance.ui.facedetectionwrappers.viewmodels.AttendanceRecordsViewModel;
 import mx.ssaj.surfingattendance.util.Literals;
@@ -67,7 +67,7 @@ public class AttendanceRecordsByFaceDetectionActivity extends SurfingDetectorAct
     }
 
     @Override
-    protected void onFacesRecognized(Bitmap fullPhoto, List<FaceRecord> recognitions) {
+    protected void onFacesRecognized(Bitmap fullPhoto, List<BioPhotos> recognitions) {
         Date date = new Date();
         long now = Instant.now().toEpochMilli();
         if (recognitions.size() > 1) {
@@ -81,12 +81,12 @@ public class AttendanceRecordsByFaceDetectionActivity extends SurfingDetectorAct
             return;
         }
 
-        FaceRecord faceRecord = recognitions.get(0);
-        int surfingUserId = faceRecord.getRecognition().getSurfingAttendanceUserId();
+        BioPhotos bioPhoto = recognitions.get(0);
+        int surfingUserId = bioPhoto.user;
         if (isPunchAllowedForUser(surfingUserId)) {
             mapOfUsersLastPunch.put(surfingUserId, now);
             SurfingAttendanceDatabase.databaseWriteExecutor.execute(() -> {
-                AttendanceRecord attendanceRecord = mapFaceRecordToAttendanceRecord(fullPhoto, faceRecord, date);
+                AttendanceRecord attendanceRecord = mapFaceRecordToAttendanceRecord(fullPhoto, surfingUserId, date);
                 AttendanceRecordsViewModel attendanceRecordsViewModel = new ViewModelProvider(this).get(AttendanceRecordsViewModel.class);
                 attendanceRecordsViewModel.persistAttendanceRecordWhilePunching(attendanceRecord);
 
@@ -110,9 +110,9 @@ public class AttendanceRecordsByFaceDetectionActivity extends SurfingDetectorAct
         return !mapOfUsersLastPunch.containsKey(surfingUserId);
     }
 
-    private AttendanceRecord mapFaceRecordToAttendanceRecord(Bitmap fullPhoto, FaceRecord faceRecord, Date date) {
+    private AttendanceRecord mapFaceRecordToAttendanceRecord(Bitmap fullPhoto, int surfingUserId, Date date) {
         AttendanceRecord attendanceRecord = new AttendanceRecord();
-        attendanceRecord.user = faceRecord.getRecognition().getSurfingAttendanceUserId();
+        attendanceRecord.user = surfingUserId;
         attendanceRecord.verifyTime = Util.getFormatterDateTime(date);
         attendanceRecord.verifyTimeEpochMilliSeconds = date.getTime();
         attendanceRecord.verifyType = VerifyType.FACE.getType();

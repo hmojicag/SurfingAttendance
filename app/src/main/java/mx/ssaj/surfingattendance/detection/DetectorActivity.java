@@ -48,20 +48,19 @@ import com.google.mlkit.vision.face.FaceDetection;
 import com.google.mlkit.vision.face.FaceDetector;
 import com.google.mlkit.vision.face.FaceDetectorOptions;
 
-import org.apache.commons.lang3.StringUtils;
-
 import mx.ssaj.surfingattendance.R;
+import mx.ssaj.surfingattendance.data.model.BioPhotoFeatures;
+import mx.ssaj.surfingattendance.data.model.BioPhotos;
 import mx.ssaj.surfingattendance.detection.customview.OverlayView;
 import mx.ssaj.surfingattendance.detection.customview.OverlayView.DrawCallback;
 import mx.ssaj.surfingattendance.detection.dto.FaceRecord;
 import mx.ssaj.surfingattendance.detection.env.BorderedText;
 import mx.ssaj.surfingattendance.detection.env.ImageUtils;
 import mx.ssaj.surfingattendance.detection.env.Logger;
-import mx.ssaj.surfingattendance.detection.tflite.SimilarityClassifier;
-import mx.ssaj.surfingattendance.detection.tflite.TFLiteObjectDetectionAPIModel;
 import mx.ssaj.surfingattendance.detection.tracking.MultiBoxTracker;
+import mx.ssaj.surfingattendance.facerecognition.FaceDetectionAndRecognitionService;
+import mx.ssaj.surfingattendance.facerecognition.dto.RecognitionResult;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -75,25 +74,16 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
 
     // MobileFaceNet
     private static final int TF_OD_API_INPUT_SIZE = 112;
-    private static final boolean TF_OD_API_IS_QUANTIZED = false;
-    private static final String TF_OD_API_MODEL_FILE = "mobile_face_net.tflite";
-
-
-    private static final String TF_OD_API_LABELS_FILE = "file:///android_asset/labelmap.txt";
-
-    private static final DetectorMode MODE = DetectorMode.TF_OD_API;
-    // Minimum detection confidence to track a detection.
-    private static final float MINIMUM_CONFIDENCE_TF_OD_API = 0.5f;
     private static final boolean MAINTAIN_ASPECT = false;
-
     private static final Size DESIRED_PREVIEW_SIZE = new Size(640, 480);
-
     private static final boolean SAVE_PREVIEW_BITMAP = false;
     private static final float TEXT_SIZE_DIP = 10;
     OverlayView trackingOverlay;
     private Integer sensorOrientation;
 
-    private SimilarityClassifier detector;
+    // Using the FaceNet PyTorch model via DJL for Face Recognition
+    private FaceDetectionAndRecognitionService faceDetectionAndRecognitionService;
+    private List<BioPhotos> bioPhotos = new ArrayList<>();
 
     private long lastProcessingTimeMs;
     private Bitmap rgbFrameBitmap = null;
@@ -168,17 +158,10 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
 
         try {
             LOGGER.i("Creating detector");
-            detector =
-                    TFLiteObjectDetectionAPIModel.create(
-                            getAssets(),
-                            TF_OD_API_MODEL_FILE,
-                            TF_OD_API_LABELS_FILE,
-                            TF_OD_API_INPUT_SIZE,
-                            TF_OD_API_IS_QUANTIZED);
-            //cropSize = TF_OD_API_INPUT_SIZE;
-        } catch (final IOException e) {
-            e.printStackTrace();
-            LOGGER.e(e, "Exception initializing classifier!");
+            faceDetectionAndRecognitionService = new FaceDetectionAndRecognitionService(this.getApplicationContext());
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            LOGGER.e(ex, "Exception initializing classifier!");
             Toast toast =
                     Toast.makeText(
                             getApplicationContext(), "Classifier could not be initialized", Toast.LENGTH_SHORT);
@@ -235,10 +218,10 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
         tracker.setFrameConfiguration(previewWidth, previewHeight, sensorOrientation);
 
         // Initialize face registry
-        List<FaceRecord> faceRecords = initializeFaceRegistry();
-        if (!CollectionUtils.isEmpty(faceRecords)) {
-            for(FaceRecord faceRecord: faceRecords) {
-                registerNewFace(faceRecord);
+        List<BioPhotos> bioPhotos = initializeFaceRegistry();
+        if (!CollectionUtils.isEmpty(bioPhotos)) {
+            for(BioPhotos bioPhoto: bioPhotos) {
+                registerNewFace(bioPhoto);
             }
         }
     }
@@ -315,12 +298,12 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
 
     @Override
     protected void setUseNNAPI(final boolean isChecked) {
-        runInBackground(() -> detector.setUseNNAPI(isChecked));
+        // Not used anymore
     }
 
     @Override
     protected void setNumThreads(final int numThreads) {
-        runInBackground(() -> detector.setNumThreads(numThreads));
+        // Not used anymore
     }
 
 
@@ -353,19 +336,17 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
         return matrix;
     }
 
-    private void showAddFaceDialog(SimilarityClassifier.Recognition rec, Bitmap fullPhoto) {
+    private void showAddFaceDialog(RecognitionResult result, Bitmap fullPhoto) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         LayoutInflater inflater = getLayoutInflater();
         View dialogLayout = inflater.inflate(R.layout.tfe_image_edit_dialog, null);
         ImageView ivFace = dialogLayout.findViewById(R.id.dlg_image);
-        ivFace.setImageBitmap(rec.getCrop());
+        ivFace.setImageBitmap(result.getCrop());
 
         builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dlg, int i) {
-                FaceRecord face = new FaceRecord();
-                face.setRecognition(rec);
-                onFaceFeaturesDetected(fullPhoto, face);
+                onFaceFeaturesDetected(fullPhoto, result);
                 adding = false;
                 dlg.dismiss();
             }
@@ -384,17 +365,17 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
         builder.show();
     }
 
-    private void updateResults(long currTimestamp, final List<SimilarityClassifier.Recognition> mappedRecognitions, Bitmap fullPhoto) {
+    private void updateResults(long currTimestamp, final List<RecognitionResult> mappedRecognitions, Bitmap fullPhoto) {
         tracker.trackResults(mappedRecognitions, currTimestamp);
         trackingOverlay.postInvalidate();
         computingDetection = false;
 
         if (mappedRecognitions.size() > 0) {
             LOGGER.i("Adding results");
-            SimilarityClassifier.Recognition rec = mappedRecognitions.get(0);
-            if (rec.getExtra() != null && StringUtils.isEmpty(rec.getTitle())) {
+            RecognitionResult result = mappedRecognitions.get(0);
+            if (adding && addPending && result.getMatchedBioPhoto() == null) {
                 // If adding was enabled and the face is not matching any other face already in the registry
-                showAddFaceDialog(rec, fullPhoto);
+                showAddFaceDialog(result, fullPhoto);
             }
         }
 
@@ -415,9 +396,9 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
         paint.setStyle(Style.STROKE);
         paint.setStrokeWidth(2.0f);
 
-        final List<SimilarityClassifier.Recognition> mappedRecognitions = new LinkedList<SimilarityClassifier.Recognition>();
+        final List<RecognitionResult> mappedRecognitions = new ArrayList<>();
         List<FaceRecord> faceExpandedList = new ArrayList<>();
-        List<FaceRecord> faceRecognizedList = new ArrayList<>();
+        List<BioPhotos> faceRecognizedList = new ArrayList<>();
         // Note this can be done only once
         int sourceW = rgbFrameBitmap.getWidth();
         int sourceH = rgbFrameBitmap.getHeight();
@@ -465,6 +446,12 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
                 String bottomRecognitionMsg = null;
 
                 if (add) {
+                    // Adjust faceBB to maximum values to avoid cropping issues
+                    faceBB = new RectF(
+                            Math.max(faceBB.left, 0),
+                            Math.max(faceBB.top, 0),
+                            Math.min(faceBB.right, portraitBmp.getWidth()),
+                            Math.min(faceBB.bottom, portraitBmp.getHeight()));
                     crop = Bitmap.createBitmap(portraitBmp,
                             (int) faceBB.left,
                             (int) faceBB.top,
@@ -477,29 +464,18 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
 
                 // Try to recognize the face
                 final long startTime = SystemClock.uptimeMillis();
-                final List<SimilarityClassifier.Recognition> resultsAux = detector.recognizeImage(faceBmp, add);
+                RecognitionResult recognitionResult = faceDetectionAndRecognitionService.recognizePhoto(faceBmp, bioPhotos);
                 lastProcessingTimeMs = SystemClock.uptimeMillis() - startTime;
 
-                if (resultsAux.size() > 0) {
-                    SimilarityClassifier.Recognition result = resultsAux.get(0);
-                    extra = result.getExtra();
-                    float conf = result.getDistance();
-                    if (conf < 1.0f) {
-                        confidence = conf;
-                        label = result.getTitle();
-                        if (result.getId().equals("0")) {
-                            // Face was recognized with enough confidence
-                            faceRecognizedList.add(new FaceRecord(label, face, faceBmp, crop, confidence, result));
-                            if (add || adding) { // Trying to add a new face?
-                                // There should not be any recognition
-                                color = Color.YELLOW;
-                                bottomRecognitionMsg = getString(R.string.activity_update_biophoto_duplicate);
-                            } else {// Ok
-                                color = Color.GREEN;
-                            }
-                        } else {
-                            color = Color.RED;
-                        }
+                if (recognitionResult != null && recognitionResult.getMatchedBioPhoto() != null) {// We found a match
+                    // Face was recognized with enough confidence
+                    faceRecognizedList.add(recognitionResult.getMatchedBioPhoto());
+                    if (add || adding) { // Trying to add a new face?
+                        // There should not be any recognition
+                        color = Color.YELLOW;
+                        bottomRecognitionMsg = getString(R.string.activity_update_biophoto_duplicate);
+                    } else {// Ok
+                        color = Color.GREEN;
                     }
                 }
 
@@ -515,17 +491,18 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
                     flip.mapRect(boundingBox);
                 }
 
-                final SimilarityClassifier.Recognition result = new SimilarityClassifier.Recognition(
-                        "0", label, confidence, boundingBox);
-
-                result.setColor(color);
-                result.setLocation(boundingBox);
-                result.setExtra(extra);
-                result.setCrop(crop);
-                result.setBottomMessage(bottomRecognitionMsg);
-                result.setShowConfidence(showConfidence);
-                result.setShowFaceLabel(showFaceLabel);
-                mappedRecognitions.add(result);
+                if (recognitionResult == null) {
+                    //No matches or no BioPhotos entry set provided
+                    // Just build a mock RecognitionResult object to make the
+                    // MultiBoxTracker work
+                    recognitionResult = new RecognitionResult();
+                }
+                recognitionResult.setColor(color);
+                recognitionResult.setLocation(boundingBox);
+                recognitionResult.setCrop(crop);
+                recognitionResult.setBottomMessage(bottomRecognitionMsg);
+                recognitionResult.setShowFaceLabel(showFaceLabel);
+                mappedRecognitions.add(recognitionResult);
             }
         }
 
@@ -546,10 +523,9 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
      * ---------------------------------------------------------------------------------------------
      */
 
-    protected void registerNewFace(FaceRecord face) {
-        LOGGER.i("registerNewFace");
-        LOGGER.i(face.getName() + " " + face.toString());
-        detector.register(face.getName(), face.getRecognition());
+    protected void registerNewFace(BioPhotos bioPhoto) {
+        LOGGER.i(String.format("registerNewFace %d", bioPhoto.user));
+        bioPhotos.add(bioPhoto);
     }
 
     protected void showBottomSheet(boolean show) {
@@ -575,7 +551,7 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
     }
 
     // To override
-    protected List<FaceRecord> initializeFaceRegistry() {
+    protected List<BioPhotos> initializeFaceRegistry() {
         // Need to override and do something
         LOGGER.i("initializeFaceRegistry");
         return new ArrayList<>();
@@ -599,10 +575,10 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
     // * DTO of the face and ID of the person detected
     // * Full photo taken by the camera
     // * Cropped image of the face detected
-    protected void onFacesRecognized(Bitmap fullPhoto, List<FaceRecord> recognitions) {
+    protected void onFacesRecognized(Bitmap fullPhoto, List<BioPhotos> recognitions) {
         // Need to override and do something
         LOGGER.i("onFacesRecognized");
-        for (FaceRecord faceRecognized : recognitions) {
+        for (BioPhotos faceRecognized : recognitions) {
             LOGGER.i(faceRecognized.toString());
         }
     }
@@ -611,10 +587,15 @@ public class DetectorActivity extends CameraActivity implements OnImageAvailable
     // Method called when FaceFeaturesDetection is ON by calling the method
     // activateFaceFeaturesDetection(true)
     // and a NEW face was detected
-    protected void onFaceFeaturesDetected(Bitmap fullPhoto, FaceRecord face) {
+    protected void onFaceFeaturesDetected(Bitmap fullPhoto, RecognitionResult recognitionResult) {
         LOGGER.i("onFaceFeaturesDetected");
-        LOGGER.i(face.toString());
-        registerNewFace(face);
+        BioPhotos bioPhoto = new BioPhotos();
+        bioPhoto.user = 0;
+        bioPhoto.type = 9;
+        bioPhoto.photo = recognitionResult.getCrop();
+        bioPhoto.Features = new BioPhotoFeatures();
+        bioPhoto.Features.setFeatures(recognitionResult.getFeatures());
+        registerNewFace(bioPhoto);
     }
 
     // Useful extra setters

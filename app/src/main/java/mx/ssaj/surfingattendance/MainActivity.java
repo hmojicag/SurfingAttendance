@@ -28,7 +28,6 @@ import mx.ssaj.surfingattendance.surfingtime.services.SurfingTimeService;
 import mx.ssaj.surfingattendance.surfingtime.services.SyncAttLogsService;
 import mx.ssaj.surfingattendance.surfingtime.services.SyncInfoService;
 import mx.ssaj.surfingattendance.surfingtime.services.SyncUsersService;
-import mx.ssaj.surfingattendance.surfingtime.tasks.ExecuteCommandsTask;
 import mx.ssaj.surfingattendance.surfingtime.tasks.InfoTask;
 import mx.ssaj.surfingattendance.surfingtime.tasks.SyncAttLogsTask;
 import mx.ssaj.surfingattendance.surfingtime.tasks.SyncCommandsUpdatesTask;
@@ -37,6 +36,12 @@ import mx.ssaj.surfingattendance.surfingtime.tasks.SyncUsersTask;
 import mx.ssaj.surfingattendance.ui.facedetectionwrappers.SurfingDetectorActivityTest;
 import mx.ssaj.surfingattendance.util.Util;
 
+/**
+ * TODO:
+ * - Delete all references to TensorFlow, tfe, tfl2_logo.png, tfl2
+ * - Search for those references in res/drawable res/layout
+ *
+ */
 public class MainActivity extends AppCompatActivity {
     private static final Logger LOGGER = new Logger();
     private static String TAG = "MainActivity";
@@ -86,16 +91,14 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.action_face_recognition_test:
-                navigateToFaceRecognitionTestingActivity();
-                return true;
-            case R.id.action_surfingtime_sync:
-                surfingTimeSync();
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
+        if (item.getItemId() == R.id.action_face_recognition_test) {
+            navigateToFaceRecognitionTestingActivity();
+            return true;
+        } else if (item.getItemId() == R.id.action_surfingtime_sync) {
+            surfingTimeSync();
+            return true;
         }
+        return super.onOptionsItemSelected(item);
     }
 
     // One time triggering of SurfingTime Synchronization of, in this order:

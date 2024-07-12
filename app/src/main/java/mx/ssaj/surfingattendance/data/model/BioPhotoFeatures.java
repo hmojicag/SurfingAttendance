@@ -21,8 +21,8 @@ public class BioPhotoFeatures {
     // Type of BioPhoto record
     public int type;// PK
 
-    /** JSON format of the set of features for this BioPhoto which is a float[][]
-     *  Example: [[123.2, 9812.0, 1121.2, ...], [...], [...]]
+    /** JSON format of the set of features for this BioPhoto which is a float[]
+     *  Example: [123.2, 9812.0, 1121.2, ...], [...], [...]
      * **/
     // Length(max)
     public String features;
@@ -31,19 +31,19 @@ public class BioPhotoFeatures {
     /** Useful calculated fields and methods **/
 
     @Ignore
-    private float[][] feature;
+    private float[] feature;
 
     @Ignore
-    public float[][] getFeature() {
+    public float[] getFeature() {
         if (feature == null) {
             if (StringUtils.isEmpty(features)) {
-                feature = new float[][]{};
+                feature = new float[]{};
             } else {
                 try {
-                    feature = JsonObjectMapperSingleton.getObjectReader().readValue(features, float[][].class);
+                    feature = JsonObjectMapperSingleton.getObjectReader().readValue(features, float[].class);
                 } catch (Exception ex) {
                     Log.e(TAG, "Error while deserializing features", ex);
-                    feature = new float[][]{};
+                    feature = new float[]{};
                 }
             }
         }
@@ -52,7 +52,7 @@ public class BioPhotoFeatures {
     }
 
     @Ignore
-    public void setFeatures(float[][] feature) {
+    public void setFeatures(float[] feature) {
         try {
             features = JsonObjectMapperSingleton
                     .getObjectWriter().writeValueAsString(feature);

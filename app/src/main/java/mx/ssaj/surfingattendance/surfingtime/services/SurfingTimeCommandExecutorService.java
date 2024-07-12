@@ -12,7 +12,7 @@ import mx.ssaj.surfingattendance.data.repositories.BioPhotosRepository;
 import mx.ssaj.surfingattendance.data.repositories.SurfingTimeCommandsRepository;
 import mx.ssaj.surfingattendance.data.repositories.UsersRepository;
 import mx.ssaj.surfingattendance.detection.env.Logger;
-import mx.ssaj.surfingattendance.detectionwrappers.FaceDetectionSynchronousService;
+import mx.ssaj.surfingattendance.facerecognition.FaceDetectionAndRecognitionService;
 import mx.ssaj.surfingattendance.surfingtime.dto.ApiBioPhoto;
 import mx.ssaj.surfingattendance.surfingtime.dto.ApiUser;
 import mx.ssaj.surfingattendance.util.Util;
@@ -38,7 +38,7 @@ public class SurfingTimeCommandExecutorService {
     private final SyncInfoService syncInfoService;
     private final SyncAttLogsService syncAttLogsService;
     private final SyncUsersService syncUsersService;
-    private final FaceDetectionSynchronousService faceDetectionSynchronousService;
+    private final FaceDetectionAndRecognitionService faceDetectionAndRecognitionService;
     private final Application application;
     private final SurfingTimeCommandsRepository surfingTimeCommandsRepository;
     private final AttendanceRecordsRepository attendanceRecordsRepository;
@@ -56,7 +56,7 @@ public class SurfingTimeCommandExecutorService {
         this.syncAttLogsService = syncAttLogsService;
         this.syncUsersService = syncUsersService;
         this.application = application;
-        faceDetectionSynchronousService = new FaceDetectionSynchronousService(application.getApplicationContext());
+        faceDetectionAndRecognitionService = new FaceDetectionAndRecognitionService(application.getApplicationContext());
         surfingTimeCommandsRepository = new SurfingTimeCommandsRepository(application);
         attendanceRecordsRepository = new AttendanceRecordsRepository(application);
         bioPhotosRepository = new BioPhotosRepository(application);
@@ -154,7 +154,7 @@ public class SurfingTimeCommandExecutorService {
             BioPhotos bioPhoto = BioPhotos.fromApiBioPhoto(apiBioPhoto);
 
             // Extracts features and thumbnail from the BioPhoto and then sets them inside the object
-            faceDetectionSynchronousService.setBioPhotoFeaturesToBioPhoto(bioPhoto);
+            faceDetectionAndRecognitionService.setBioPhotoFeaturesToBioPhoto(bioPhoto);
             BioPhotoFeatures bioPhotoFeatures = bioPhoto.Features;
             BioPhotos thumbNailBioPhoto = bioPhoto.Thumbnail;
             thumbNailBioPhoto.isSync = TRUE;

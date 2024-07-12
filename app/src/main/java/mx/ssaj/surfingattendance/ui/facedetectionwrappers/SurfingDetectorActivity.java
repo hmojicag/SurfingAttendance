@@ -4,8 +4,8 @@ import androidx.lifecycle.ViewModelProvider;
 import java.util.ArrayList;
 import java.util.List;
 import mx.ssaj.surfingattendance.data.SurfingAttendanceDatabase;
+import mx.ssaj.surfingattendance.data.model.BioPhotos;
 import mx.ssaj.surfingattendance.detection.DetectorActivity;
-import mx.ssaj.surfingattendance.detection.dto.FaceRecord;
 import mx.ssaj.surfingattendance.ui.facedetectionwrappers.viewmodels.SurfingDetectorViewModel;
 
 public class SurfingDetectorActivity extends DetectorActivity {
@@ -13,15 +13,15 @@ public class SurfingDetectorActivity extends DetectorActivity {
     protected List<Integer> userIdsToSkip = new ArrayList<>();
 
     @Override
-    protected List<FaceRecord> initializeFaceRegistry() {
+    protected List<BioPhotos> initializeFaceRegistry() {
         // Build Face Registry from DB
         SurfingDetectorViewModel surfingDetectorViewModel = new ViewModelProvider(this).get(SurfingDetectorViewModel.class);
         SurfingAttendanceDatabase.databaseWriteExecutor.execute(() -> {
             // Recover all faces from DB and register for detection
-            List<FaceRecord> faceRegistry = surfingDetectorViewModel.getFaceRegistry();
-            for(FaceRecord faceRecord: faceRegistry) {
-                if (!userIdsToSkip.contains(faceRecord.getUserId())) {
-                    registerNewFace(faceRecord);
+            List<BioPhotos> faceRegistry = surfingDetectorViewModel.getFaceRegistry();
+            for(BioPhotos bioPhoto: faceRegistry) {
+                if (!userIdsToSkip.contains(bioPhoto.user)) {
+                    registerNewFace(bioPhoto);
                 }
             }
         });

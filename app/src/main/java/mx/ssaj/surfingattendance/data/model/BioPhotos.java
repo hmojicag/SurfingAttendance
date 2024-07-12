@@ -62,9 +62,15 @@ public class BioPhotos {
     /** Useful calculated fields and methods **/
 
     @Ignore
+    public Bitmap photo = null;
+
+    @Ignore
     public Bitmap getPhoto() {
-        byte[] bitmapdata = Base64.getDecoder().decode(photoIdContent);
-        return BitmapFactory.decodeByteArray(bitmapdata, 0, bitmapdata.length);
+        if (photo == null) {
+            byte[] bitmapdata = Base64.getDecoder().decode(photoIdContent);
+            photo = BitmapFactory.decodeByteArray(bitmapdata, 0, bitmapdata.length);
+        }
+        return photo;
     }
 
     @Ignore
