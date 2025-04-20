@@ -21,7 +21,15 @@ public class ApiAttLog {
     private int photoIdSize;
 
     private String photoIdContent;
+
     /* ------------------------------------------------------------------------------------------*/
+
+    /**
+     * Precision of 6 decimal digits
+     * <Longitude>,<Latitude>
+     * Example: -99.986500,25.742400
+     * */
+    private String geoLocation;
 
     /** ---------------------------------------------------------------------------------------- **/
     /** Getters and Setters **/
@@ -72,5 +80,13 @@ public class ApiAttLog {
 
     public void setPhotoIdContent(String photoIdContent) {
         this.photoIdContent = photoIdContent;
+    }
+
+    public String getGeoLocation() {
+        return geoLocation;
+    }
+
+    public void setGeoLocation(String geoLocation) {
+        this.geoLocation = geoLocation;
     }
 }

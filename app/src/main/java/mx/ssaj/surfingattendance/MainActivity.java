@@ -1,13 +1,22 @@
 package mx.ssaj.surfingattendance;
 
+import android.Manifest;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.Menu;
+
+import com.google.android.gms.location.CurrentLocationRequest;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.Priority;
 import com.google.android.material.navigation.NavigationView;
+
+import androidx.core.app.ActivityCompat;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
@@ -48,6 +57,10 @@ public class MainActivity extends AppCompatActivity {
     private AppBarConfiguration mAppBarConfiguration;
     private ActivityMainBinding binding;
 
+    private FusedLocationProviderClient fusedLocationProviderClient;
+    private static final String PERMISSION_LOCATION = Manifest.permission.ACCESS_FINE_LOCATION;
+    private static final int LOCATION_PERMISSION_REQUEST = 1001;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -73,6 +86,17 @@ public class MainActivity extends AppCompatActivity {
 
         // Trigger Foreground Services
         startForeGroundServices();
+
+        // Request permissions
+        checkLocationPermission();
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+
+        // Request permissions
+        checkLocationPermission();
     }
 
     @Override
@@ -170,6 +194,29 @@ public class MainActivity extends AppCompatActivity {
             SharedPreferences.Editor editor = sharedPreferences.edit();
             editor.putString("deviceSn", deviceSn);
             editor.commit();
+        }
+    }
+
+    private void checkLocationPermission() {
+        if (checkSelfPermission(PERMISSION_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            // Request location so that it gets cached
+            if (fusedLocationProviderClient == null) {
+                fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
+            }
+            CurrentLocationRequest locationRequest = new CurrentLocationRequest.Builder()
+                    .setPriority(Priority.PRIORITY_BALANCED_POWER_ACCURACY)
+                    .setMaxUpdateAgeMillis(10 * 60 * 1000) // 10 min old location
+                    .build();
+            LOGGER.i(TAG, "Acquiring Location");
+            fusedLocationProviderClient.getCurrentLocation(locationRequest, null).addOnSuccessListener(location -> {
+                String geoLocation = null;
+                if (location != null) {
+                    geoLocation = String.format("%.6f,%.6f", location.getLongitude(), location.getLatitude());
+                }
+                LOGGER.i(TAG, "Location acquired %s", geoLocation);
+            });
+        } else {// Request permissions
+            ActivityCompat.requestPermissions(this, new String[] {PERMISSION_LOCATION}, LOCATION_PERMISSION_REQUEST);
         }
     }
 }

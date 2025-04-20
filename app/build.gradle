@@ -11,8 +11,8 @@ android {
         applicationId "mx.ssaj.surfingattendance"
         minSdk 29
         targetSdk 34
-        versionCode 3
-        versionName "2.0"
+        versionCode 4
+        versionName "2.1"
         resConfigs "en", "es"
         vectorDrawables.useSupportLibrary = true
 
@@ -67,6 +67,9 @@ dependencies {
 
     implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.5.1'
     implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.1'
+
+    // Location
+    implementation 'com.google.android.gms:play-services-location:21.3.0'
 
     // Utils
     // Jackson Serializer https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind

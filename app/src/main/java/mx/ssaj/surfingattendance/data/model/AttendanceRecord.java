@@ -55,6 +55,13 @@ public class AttendanceRecord {
     public String photoIdContent;
     /** ------------------------------------------------------------------------------------------*/
 
+    /**
+     * Precision of 6 decimal digits
+     * <Longitude>,<Latitude>
+     * Example: -99.986500,25.742400
+     * */
+    public String geoLocation;
+
     // Boolean. Is this record synced to SurfingTime already?
     public int isSync;
 
@@ -107,6 +114,7 @@ public class AttendanceRecord {
         apiAttLog.setPhotoIdName(photoIdName);
         apiAttLog.setPhotoIdSize(photoIdSize);
         apiAttLog.setPhotoIdContent(photoIdContent);
+        apiAttLog.setGeoLocation(geoLocation);
         return apiAttLog;
     }
 
