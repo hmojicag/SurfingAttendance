@@ -1,9 +1,16 @@
 package mx.ssaj.surfingattendance.data.repositories;
 
+import android.Manifest;
 import android.app.Application;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+
+import androidx.core.app.ActivityCompat;
 import androidx.lifecycle.LiveData;
 import androidx.preference.PreferenceManager;
+
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import java.text.ParseException;
@@ -24,6 +31,7 @@ public class AttendanceRecordsRepository {
     private Application application;
     private AttendanceRecordDao attendanceRecordDao;
     private UsersDao usersDao;
+    private FusedLocationProviderClient fusedLocationProviderClient;
     private int milliSecondsBetweenValidAttRecords;
 
     public AttendanceRecordsRepository(Application application) {
@@ -35,6 +43,8 @@ public class AttendanceRecordsRepository {
         // Check Settings
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(application.getApplicationContext());
         milliSecondsBetweenValidAttRecords = Integer.parseInt(sharedPreferences.getString("faceAttInterval", "5")) * 1000;
+
+        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(application);
     }
 
     public int getAttendanceRecordCount() {
@@ -48,7 +58,7 @@ public class AttendanceRecordsRepository {
         AttendanceRecord attendanceRecordDb = attendanceRecordDao.findLastOneByUserId(attendanceRecord.user);
         if (attendanceRecordDb == null ||
                 (Math.abs(attendanceRecord.verifyTimeEpochMilliSeconds - attendanceRecordDb.verifyTimeEpochMilliSeconds) > milliSecondsBetweenValidAttRecords)) {
-            insert(attendanceRecord);
+            insertWithLocation(attendanceRecord);
         } else {
             LOGGER.d(TAG, "Ruling out duplicate Attendance Record for user " + attendanceRecord.user);
         }
@@ -91,6 +101,23 @@ public class AttendanceRecordsRepository {
 
     public LiveData<List<AttendanceRecord>> getAllAttendanceRecordsLive() {
         return attendanceRecordDao.getAllAttendanceRecordsLive();
+    }
+
+    public void insertWithLocation(AttendanceRecord attendanceRecord) {
+        if (ActivityCompat.checkSelfPermission(application, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            fusedLocationProviderClient.getLastLocation().addOnSuccessListener(location -> {
+                String geoLocation = null;
+                if (location != null) {
+                    geoLocation = String.format("%.6f,%.6f", location.getLongitude(), location.getLatitude());
+                }
+                attendanceRecord.geoLocation = geoLocation;
+                SurfingAttendanceDatabase.databaseWriteExecutor.execute(() -> {
+                    insert(attendanceRecord);
+                });
+            });
+        } else {
+            insert(attendanceRecord);
+        }
     }
 
     public void insert(AttendanceRecord attendanceRecord) {

@@ -48,7 +48,7 @@ public class AttendanceByPasswordViewModel extends AndroidViewModel {
         attendanceRecord.verifyTimeEpochMilliSeconds = now.getTime();
         attendanceRecord.verifyType = VerifyType.PASSWORD.getType();
         attendanceRecord.isSync = Literals.FALSE;
-        attendanceRecordsRepository.insert(attendanceRecord);
+        attendanceRecordsRepository.insertWithLocation(attendanceRecord);
     }
 
 }
