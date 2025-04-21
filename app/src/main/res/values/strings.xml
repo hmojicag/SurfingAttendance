@@ -16,6 +16,7 @@
     <string name="button_cancel">Cancel</string>
     <string name="button_delete">Delete</string>
     <string name="button_goback">Go Back</string>
+    <string name="editText_user_search">Search</string>
     <string name="editText_user_id">User Id.</string>
     <string name="editText_user_name">Name</string>
     <string name="editText_password">Password</string>
