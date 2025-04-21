@@ -102,6 +102,17 @@ public class Users {
     }
 
     @Ignore
+    // Returns true if the search string passed matches the name and/or id of this user
+    // returns false otherwise
+    // The search string passed is assumed to never be null
+    public boolean search(String searchString) {
+        String lowerSearchString = searchString.toLowerCase();
+        String userString = String.valueOf(user);
+        String userName = name == null ? "" : name.toLowerCase();
+        return userString.contains(lowerSearchString) || userName.contains(lowerSearchString);
+    }
+
+    @Ignore
     public List<Areas> Areas;
 
     @Ignore
@@ -173,5 +184,4 @@ public class Users {
         userInst.isSync = TRUE;
         return userInst;
     }
-
 }

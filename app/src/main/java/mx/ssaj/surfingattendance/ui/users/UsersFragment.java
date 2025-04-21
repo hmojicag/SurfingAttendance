@@ -1,6 +1,8 @@
 package mx.ssaj.surfingattendance.ui.users;
 
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,11 +14,19 @@ import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import org.apache.commons.lang3.StringUtils;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
 import mx.ssaj.surfingattendance.R;
+import mx.ssaj.surfingattendance.data.model.Users;
 import mx.ssaj.surfingattendance.databinding.FragmentUsersBinding;
+import mx.ssaj.surfingattendance.detection.env.Logger;
 
 public class UsersFragment extends Fragment {
-
+    private static final Logger LOGGER = new Logger();
+    private static String TAG = "UsersFragment";
     private FragmentUsersBinding binding;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -38,13 +48,39 @@ public class UsersFragment extends Fragment {
         recyclerViewUsers.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerViewUsers.setAdapter(userListItemAdapter);
 
+        binding.editTextListUserSearch.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                // Empty on purpose
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                // Empty on purpose
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                filterUsersAndRefreshView(binding.editTextListUserSearch.getText(), usersViewModel.allUsers, userListItemAdapter);
+            }
+        });
+
         usersViewModel.getAllUsersLive().observe(this.getViewLifecycleOwner(), users -> {
-            userListItemAdapter.submitList(users);
+            usersViewModel.allUsers = users;
+            filterUsersAndRefreshView(binding.editTextListUserSearch.getText(), users, userListItemAdapter);
         });
 
         return root;
     }
 
+    private void filterUsersAndRefreshView(Editable editable, List<Users> users, UserListItemAdapter userListItemAdapter) {
+        List<Users> filteredUsers = users;
+        if(editable != null && StringUtils.isNotBlank(editable.toString())) {
+            String searchString = editable.toString();
+            filteredUsers = users.stream().filter(u ->  u.search(searchString)).collect(Collectors.toList());
+        }
+        userListItemAdapter.submitList(filteredUsers);
+    }
 
     @Override
     public void onDestroyView() {

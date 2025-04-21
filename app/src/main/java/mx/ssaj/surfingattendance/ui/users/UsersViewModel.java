@@ -12,7 +12,10 @@ import mx.ssaj.surfingattendance.data.repositories.UsersRepository;
 
 public class UsersViewModel extends AndroidViewModel {
 
+    // Caching users to be used later for filtering
+    public List<Users> allUsers;
     private UsersRepository usersRepository;
+
 
     public UsersViewModel(Application application) {
         super(application);

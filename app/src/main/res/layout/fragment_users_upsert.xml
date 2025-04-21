@@ -29,7 +29,6 @@
             android:hint="@string/editText_user_id"
             android:inputType="number"
             android:layout_margin="16dp"
-
             android:textSize="18sp" />
 
         <Switch
