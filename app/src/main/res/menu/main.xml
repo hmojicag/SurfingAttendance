@@ -11,4 +11,9 @@
         android:orderInCategory="101"
         android:title="@string/action_surfingtime_sync"
         app:showAsAction="never" />
+    <item
+        android:id="@+id/action_surfingnext_config"
+        android:orderInCategory="102"
+        android:title="@string/action_surfingnext_config"
+        app:showAsAction="never" />
 </menu>

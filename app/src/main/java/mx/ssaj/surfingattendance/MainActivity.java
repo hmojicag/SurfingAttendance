@@ -2,13 +2,18 @@ package mx.ssaj.surfingattendance;
 
 import android.Manifest;
 import android.app.ActivityManager;
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.Menu;
+import android.widget.Toast;
 
 import com.google.android.gms.location.CurrentLocationRequest;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -31,6 +36,7 @@ import java.util.TimerTask;
 
 import mx.ssaj.surfingattendance.data.SurfingAttendanceDatabase;
 import mx.ssaj.surfingattendance.databinding.ActivityMainBinding;
+import mx.ssaj.surfingattendance.databinding.DialogSurfingnextConfigBinding;
 import mx.ssaj.surfingattendance.detection.env.Logger;
 import mx.ssaj.surfingattendance.surfingtime.SurfingTimeForegroundService;
 import mx.ssaj.surfingattendance.surfingtime.services.SurfingTimeService;
@@ -121,6 +127,9 @@ public class MainActivity extends AppCompatActivity {
         } else if (item.getItemId() == R.id.action_surfingtime_sync) {
             surfingTimeSync();
             return true;
+        } else if (item.getItemId() == R.id.action_surfingnext_config) {
+            surfingNextConfig();
+            return true;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -172,6 +181,40 @@ public class MainActivity extends AppCompatActivity {
                 startForegroundService(surfingTimeForeGroundServiceIntent);
             }
         }
+    }
+
+    private void surfingNextConfig() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        LayoutInflater inflater =this.getLayoutInflater();
+        DialogSurfingnextConfigBinding dialogSurfingnextConfigBinding = DialogSurfingnextConfigBinding.inflate(inflater);
+        builder.setView(dialogSurfingnextConfigBinding.getRoot())
+                // Add action buttons
+                .setPositiveButton(R.string.dialog_surfingnext_otp_ok, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int id) {
+                        String otp = dialogSurfingnextConfigBinding.terminalOtpTextOtp.getText().toString();
+                        SurfingTimeService surfingTimeService = new SurfingTimeService(getApplicationContext());
+                        SurfingAttendanceDatabase.databaseWriteExecutor.execute(() -> {
+                            try {
+                                surfingTimeService.configSurfingNext(otp);
+                                runOnUiThread(() -> {
+                                    Toast.makeText(getApplicationContext(), "SurfingNext configurado correctamente", Toast.LENGTH_LONG).show();
+                                });
+                            } catch (Exception e) {
+                                runOnUiThread(() -> {
+                                    Toast.makeText(getApplicationContext(), "Código OTP inválido o error de red", Toast.LENGTH_LONG).show();
+                                });
+                            }
+                        });
+                    }
+                })
+                .setNegativeButton(R.string.dialog_surfingnext_otp_cancel, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.cancel();
+                    }
+                });
+        Dialog dialog = builder.create();
+        dialog.show();
     }
 
     private boolean foregroundServiceRunning(Class serviceClass) {

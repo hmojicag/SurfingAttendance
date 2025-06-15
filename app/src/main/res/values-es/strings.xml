@@ -8,6 +8,11 @@
     <string name="action_settings">Configuración</string>
     <string name="action_face_recognition_test">Test Reconocimiento Facial</string>
     <string name="action_surfingtime_sync">Surfing Sync</string>
+    <string name="action_surfingnext_config">SurfingNext Config</string>
+    <string name="dialog_surfingnext_otp">Código OTP</string>
+    <string name="dialog_surfingnext_otp_ok">Ok</string>
+    <string name="dialog_surfingnext_otp_cancel">Cancelar</string>
+    <string name="dialog_surfingnext_otp_text">Input the value of the OTP code shown in SurfingNext</string>
 
     <string name="button_open_attendance_face_activity">Asistencia con cara</string>
     <string name="button_add_user">Agregar Usuario</string>
