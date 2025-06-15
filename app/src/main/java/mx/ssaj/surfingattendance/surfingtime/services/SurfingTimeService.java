@@ -2,6 +2,8 @@ package mx.ssaj.surfingattendance.surfingtime.services;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.widget.Toast;
+
 import androidx.preference.PreferenceManager;
 import org.apache.commons.lang3.StringUtils;
 import java.util.List;
@@ -12,9 +14,11 @@ import mx.ssaj.surfingattendance.surfingtime.dto.ApiCommandUpdate;
 import mx.ssaj.surfingattendance.surfingtime.dto.ApiInfoRequest;
 import mx.ssaj.surfingattendance.surfingtime.dto.ApiInfoResponse;
 import mx.ssaj.surfingattendance.surfingtime.dto.ApiUser;
+import mx.ssaj.surfingattendance.surfingtime.dto.RedeemTerminalOtp;
 import mx.ssaj.surfingattendance.surfingtime.dto.TokenRequest;
 import mx.ssaj.surfingattendance.detection.env.Logger;
 import mx.ssaj.surfingattendance.surfingtime.dto.TokenResponse;
+import mx.ssaj.surfingattendance.surfingtime.dto.WebApiClients;
 import mx.ssaj.surfingattendance.surfingtime.restclient.RetryableRetrofitCall;
 import mx.ssaj.surfingattendance.surfingtime.restclient.SurfingTimeServiceRestClient;
 import retrofit2.Call;
@@ -25,6 +29,7 @@ import retrofit2.converter.jackson.JacksonConverterFactory;
 public class SurfingTimeService {
     private static final Logger LOGGER = new Logger();
     private static String TAG = "SurfingTimeService";
+    private static final String SurfingNextDefaultBaseUrl = "https://apisurfingnext.azurewebsites.net";
     private SurfingTimeServiceRestClient surfingTimeServiceRestClient;
     private Context context;
     private static final int MAX_FAILS_FOR_DISABLING = 3;
@@ -38,6 +43,32 @@ public class SurfingTimeService {
 
     public SurfingTimeService(Context context) {
         this.context = context;
+    }
+
+    public void configSurfingNext(String otp) throws Exception {
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(SurfingNextDefaultBaseUrl)
+                .addConverterFactory(JacksonConverterFactory.create())
+                .build();
+        SurfingTimeServiceRestClient surfingTimeServiceRestClient = retrofit.create(SurfingTimeServiceRestClient.class);
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        String deviceSn = sharedPreferences.getString("deviceSn", "");
+        RedeemTerminalOtp redeemTerminalOtp = new RedeemTerminalOtp();
+        redeemTerminalOtp.setOtp(otp);
+        redeemTerminalOtp.setDeviceSn(deviceSn);
+        Response<WebApiClients> response = surfingTimeServiceRestClient.redeemTerminalOtp(redeemTerminalOtp).execute();
+        if (response.isSuccessful()) {
+            String clientId = response.body().getClientId();
+            String clientSecret = response.body().getClientSecret();
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putString("surfingTimeUrl", SurfingNextDefaultBaseUrl);
+            editor.putString("surfingTimeClientId", clientId);
+            editor.putString("surfingTimeClientSecret", clientSecret);
+            editor.putBoolean("surfingTimeEnabled", true);
+            editor.commit();
+        } else {
+            throw new Exception("Código OTP inválido");
+        }
     }
 
     public ApiInfoResponse info(ApiInfoRequest apiInfoRequest) throws Exception {

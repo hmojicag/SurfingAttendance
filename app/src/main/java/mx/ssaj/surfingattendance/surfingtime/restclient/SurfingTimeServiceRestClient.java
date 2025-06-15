@@ -9,8 +9,10 @@ import mx.ssaj.surfingattendance.surfingtime.dto.ApiCommandUpdate;
 import mx.ssaj.surfingattendance.surfingtime.dto.ApiInfoRequest;
 import mx.ssaj.surfingattendance.surfingtime.dto.ApiInfoResponse;
 import mx.ssaj.surfingattendance.surfingtime.dto.ApiUser;
+import mx.ssaj.surfingattendance.surfingtime.dto.RedeemTerminalOtp;
 import mx.ssaj.surfingattendance.surfingtime.dto.TokenRequest;
 import mx.ssaj.surfingattendance.surfingtime.dto.TokenResponse;
+import mx.ssaj.surfingattendance.surfingtime.dto.WebApiClients;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
@@ -23,6 +25,9 @@ public interface SurfingTimeServiceRestClient {
 
     @POST("api/auth")
     Call<TokenResponse> requestToken(@Body TokenRequest tokenRequest);
+
+    @POST("api/attendance/terminales/otp/redeem")
+    Call<WebApiClients> redeemTerminalOtp(@Body RedeemTerminalOtp redeemTerminalOtp);
 
     @POST("api/attendance/device/info")
     Call<ApiInfoResponse> info(@Header("Authorization") String authorization, @Body ApiInfoRequest apiInfoRequest);
