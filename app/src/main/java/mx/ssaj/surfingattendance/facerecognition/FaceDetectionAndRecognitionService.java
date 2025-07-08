@@ -1,9 +1,12 @@
 package mx.ssaj.surfingattendance.facerecognition;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.RectF;
 import android.util.Log;
+
+import androidx.preference.PreferenceManager;
 
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
@@ -44,7 +47,7 @@ import mx.ssaj.surfingattendance.util.Util;
 public class FaceDetectionAndRecognitionService {
     private static final String TAG = "FaceDetectionAndRecognitionService";
     private static final String MODEL_ZIP_DOWNLOAD_FILENAME = "face_feature.zip";
-    private static final float featureThresholdForMatch = 0.70f;
+    private float featureThresholdForMatch = 0.95f;
     private Context context;
     private FaceDetector faceDetector;
     private Criteria<Image, float[]> criteria;
@@ -64,6 +67,11 @@ public class FaceDetectionAndRecognitionService {
         criteria = buildCriteria();
         model = loadZooModel(criteria);
         predictor = createPredictor(model);
+
+        // Override Face Feature Threshold with settings value
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        String featureThresholdForMatchStr = sharedPreferences.getString("faceFeatureThresholdForMatch", "0.95");
+        featureThresholdForMatch = Float.parseFloat(featureThresholdForMatchStr);
     }
 
 

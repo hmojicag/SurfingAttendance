@@ -72,4 +72,5 @@
     <string name="settings_surfingtime_client_secret">Client Secret</string>
     <string name="settings_surfingtime_delay">Intervalo de Sincronizacion</string>
     <string name="settings_att_interval_face">Same face att. record interval</string>
+    <string name="settings_att_faceFeatureThresholdForMatch">Porcentaje de confianza de reconocimiento facial para match</string>
 </resources>

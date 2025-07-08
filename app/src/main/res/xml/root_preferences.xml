@@ -17,6 +17,14 @@
     <PreferenceCategory app:title="@string/settings_category_attendance">
 
         <ListPreference
+            app:defaultValue="0.95"
+            app:key="faceFeatureThresholdForMatch"
+            app:entries="@array/settings_att_faceFeatureThresholdForMatch_entries"
+            app:entryValues="@array/settings_att_faceFeatureThresholdForMatch_values"
+            app:title="@string/settings_att_faceFeatureThresholdForMatch"
+            app:useSimpleSummaryProvider="true" />
+
+        <ListPreference
             app:defaultValue="5"
             app:key="faceAttInterval"
             app:entries="@array/face_att_interval_entries"

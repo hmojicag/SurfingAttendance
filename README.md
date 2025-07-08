@@ -77,8 +77,14 @@ Which in turn seems to be an unpolished but amazing wrapper around some Tensor F
 
 Everything else was coded by myself.
 
+
+# Face Recognition
+
+As of July 7, 2025 SurfingAttendance is using the PyTorch model Facenet for Face Recognition
+
+* https://github.com/timesler/facenet-pytorch
+
 ## Roadmap
 
-* Clean up everything inside `app\src\main\java\mx\ssaj\surfingattendanceapp\detection` which is a real mess
 * Probably create a separate re-usable library with a Component to use for Face Recognition alone
 * Improve face detection capabilities
