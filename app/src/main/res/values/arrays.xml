@@ -12,6 +12,41 @@
         <item>20</item>
     </string-array>
 
+    <!-- Face match confidence threshold percentage -->
+    <string-array name="settings_att_faceFeatureThresholdForMatch_entries">
+        <item>70%</item>
+        <item>75%</item>
+        <item>80%</item>
+        <item>85%</item>
+        <item>90%</item>
+        <item>91%</item>
+        <item>92%</item>
+        <item>93%</item>
+        <item>94%</item>
+        <item>95%</item>
+        <item>96%</item>
+        <item>97%</item>
+        <item>98%</item>
+        <item>99%</item>
+    </string-array>
+
+    <string-array name="settings_att_faceFeatureThresholdForMatch_values">
+        <item>0.70</item>
+        <item>0.75</item>
+        <item>0.80</item>
+        <item>0.85</item>
+        <item>0.90</item>
+        <item>0.91</item>
+        <item>0.92</item>
+        <item>0.93</item>
+        <item>0.94</item>
+        <item>0.95</item>
+        <item>0.96</item>
+        <item>0.97</item>
+        <item>0.98</item>
+        <item>0.99</item>
+    </string-array>
+
     <!-- Synchronization intervals for the device to pull commands from SurfingTime -->
     <string-array name="surfingtime_delay_entries">
         <item>2min.</item>
