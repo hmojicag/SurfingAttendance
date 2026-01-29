@@ -29,10 +29,12 @@ public class SyncNewCommandsTask extends TimerTask {
     private final long maxDelay;
     private long delay;
     private long delayElapsed;
+    private boolean forceSync;
 
-    public SyncNewCommandsTask(SurfingTimeService surfingTimeService, Application application) {
+    public SyncNewCommandsTask(SurfingTimeService surfingTimeService, Application application, boolean forceSync) {
         this.surfingTimeService = surfingTimeService;
         this.application = application;
+        this.forceSync = forceSync;
         surfingTimeCommandsRepository = new SurfingTimeCommandsRepository(application);
         maxDelay = Util.getDelaySetting(application) * 1000;
         delay = SurfingTimeForegroundService.SYNC_NEW_COMMANDS_PERIOD;
@@ -59,7 +61,10 @@ public class SyncNewCommandsTask extends TimerTask {
             epochLastTick = now.getTime();
             if (delayElapsed < delay) {
                 LOGGER.i(TAG, "Desired delay not yet reached");
-                return;
+                if(!forceSync) {
+                    return;
+                }
+                LOGGER.i(TAG, "Desired delay not yet reached but forceSync is enabled");
             }
 
             LOGGER.i(TAG, "Pulling New Commands from SurfingTime");

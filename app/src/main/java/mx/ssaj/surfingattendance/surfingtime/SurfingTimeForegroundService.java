@@ -65,7 +65,7 @@ public class SurfingTimeForegroundService extends Service {
         TimerTask infoTask = new InfoTask(surfingTimeService, syncInfoService, getApplication());
         TimerTask syncAttLogsTask = new SyncAttLogsTask(surfingTimeService, syncAttLogsService, getApplication());
         TimerTask syncUsersTask = new SyncUsersTask(surfingTimeService, syncUsersService, getApplication());
-        TimerTask syncNewCommandsTask = new SyncNewCommandsTask(surfingTimeService, getApplication());
+        TimerTask syncNewCommandsTask = new SyncNewCommandsTask(surfingTimeService, getApplication(), true);
         TimerTask syncCommandsUpdatesTask = new SyncCommandsUpdatesTask(surfingTimeService, getApplication());
         TimerTask executeCommandsTask = new ExecuteCommandsTask(surfingTimeService, surfingTimeCommandExecutorService, getApplication());
         timer.schedule(infoTask, 0, INFO_PERIOD);
