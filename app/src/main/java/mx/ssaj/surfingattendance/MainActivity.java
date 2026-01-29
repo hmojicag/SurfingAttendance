@@ -39,10 +39,12 @@ import mx.ssaj.surfingattendance.databinding.ActivityMainBinding;
 import mx.ssaj.surfingattendance.databinding.DialogSurfingnextConfigBinding;
 import mx.ssaj.surfingattendance.detection.env.Logger;
 import mx.ssaj.surfingattendance.surfingtime.SurfingTimeForegroundService;
+import mx.ssaj.surfingattendance.surfingtime.services.SurfingTimeCommandExecutorService;
 import mx.ssaj.surfingattendance.surfingtime.services.SurfingTimeService;
 import mx.ssaj.surfingattendance.surfingtime.services.SyncAttLogsService;
 import mx.ssaj.surfingattendance.surfingtime.services.SyncInfoService;
 import mx.ssaj.surfingattendance.surfingtime.services.SyncUsersService;
+import mx.ssaj.surfingattendance.surfingtime.tasks.ExecuteCommandsTask;
 import mx.ssaj.surfingattendance.surfingtime.tasks.InfoTask;
 import mx.ssaj.surfingattendance.surfingtime.tasks.SyncAttLogsTask;
 import mx.ssaj.surfingattendance.surfingtime.tasks.SyncCommandsUpdatesTask;
@@ -148,8 +150,10 @@ public class MainActivity extends AppCompatActivity {
         TimerTask infoTask = new InfoTask(surfingTimeService, syncInfoService, getApplication());
         TimerTask syncAttLogsTask = new SyncAttLogsTask(surfingTimeService, syncAttLogsService, getApplication());
         TimerTask syncUsersTask = new SyncUsersTask(surfingTimeService, syncUsersService, getApplication());
-        TimerTask syncNewCommandsTask = new SyncNewCommandsTask(surfingTimeService, getApplication());
+        TimerTask syncNewCommandsTask = new SyncNewCommandsTask(surfingTimeService, getApplication(), true);
         TimerTask syncCommandsUpdatesTask = new SyncCommandsUpdatesTask(surfingTimeService, getApplication());
+        SurfingTimeCommandExecutorService surfingTimeCommandExecutorService = new SurfingTimeCommandExecutorService(surfingTimeService, syncInfoService, syncAttLogsService, syncUsersService, getApplication());
+        TimerTask executeCommandsTask = new ExecuteCommandsTask(surfingTimeService, surfingTimeCommandExecutorService, getApplication());
 
         // Run all services one after the other
         SurfingAttendanceDatabase.databaseWriteExecutor.execute(() -> {
@@ -158,6 +162,7 @@ public class MainActivity extends AppCompatActivity {
             syncUsersTask.run();
             syncNewCommandsTask.run();
             syncCommandsUpdatesTask.run();
+            executeCommandsTask.run();
         });
     }
 

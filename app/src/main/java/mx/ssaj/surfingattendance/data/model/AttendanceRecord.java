@@ -111,6 +111,7 @@ public class AttendanceRecord {
         ApiAttLog apiAttLog = new ApiAttLog();
         apiAttLog.setUser(user);
         apiAttLog.setVerifyTime(verifyTime);
+        apiAttLog.setVerifyType(verifyType);
         apiAttLog.setPhotoIdName(photoIdName);
         apiAttLog.setPhotoIdSize(photoIdSize);
         apiAttLog.setPhotoIdContent(photoIdContent);
