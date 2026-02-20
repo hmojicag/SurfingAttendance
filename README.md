@@ -80,9 +80,11 @@ Everything else was coded by myself.
 
 # Face Recognition
 
-As of July 7, 2025 SurfingAttendance is using the PyTorch model Facenet for Face Recognition
+As of July 7, 2025 SurfingAttendance is using the PyTorch model Facenet for Face Recognition.
 
 * https://github.com/timesler/facenet-pytorch
+
+Since this is a native Android app built entirely in Java it is using [DJL](https://djl.ai) to import the pytorch model and make predictions.
 
 ## Roadmap
 
